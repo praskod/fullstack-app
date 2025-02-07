@@ -8,22 +8,38 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      # Step 1: Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Install Heroku CLI
-      run: |
-        curl https://cli-assets.heroku.com/install.sh | sh
+      # Step 2: Set up Heroku CLI
+      - name: Set up Heroku CLI
+        run: |
+          curl https://cli-assets.heroku.com/install.sh | sh
+          echo "Heroku CLI installed"
 
-    - name: Build, Push, and Release Docker container to Heroku
-      uses: gonuit/heroku-docker-deploy@v1.3.3
-      with:
-        email: ${{ secrets.HEROKU_EMAIL }}
-        heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-        heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
-        dockerfile_directory: ./
-        dockerfile_name: Dockerfile
-        docker_options: "--no-cache"
-        process_type: web
+      # Step 3: Log in to Heroku using the API key
+      - name: Log in to Heroku
+        run: |
+          echo ${{ secrets.HEROKU_API_KEY }} | heroku auth:token
+
+      # Step 4: Build the Docker container
+      - name: Build Docker container
+        run: |
+          docker build -t registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web .
+
+      # Step 5: Push Docker container to Heroku
+      - name: Push Docker container to Heroku
+        run: |
+          docker push registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web
+
+      # Step 6: Release the Docker container on Heroku
+      - name: Release Docker container
+        run: |
+          heroku container:release web --app ${{ secrets.HEROKU_APP_NAME }}
+
+      # Step 7: Verify if the deployment is successful
+      - name: Check Heroku app status
+        run: |
+          heroku apps:info --app ${{ secrets.HEROKU_APP_NAME }}
