@@ -26,4 +26,4 @@ jobs:
 
     - name: Release Docker container on Heroku
       run: |
-        docker run --rm registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web
+        heroku container:release web --app ${{ secrets.HEROKU_APP_NAME }}
