@@ -22,7 +22,7 @@ jobs:
       # Step 3: Log in to Heroku using the API key
       - name: Log in to Heroku
         run: |
-          echo ${{ secrets.HEROKU_API_KEY }} | heroku auth:token
+          echo "${{ secrets.HEROKU_API_KEY }}" | heroku auth:token
 
       # Step 4: Build the Docker container
       - name: Build Docker container
