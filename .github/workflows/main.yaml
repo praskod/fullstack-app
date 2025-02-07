@@ -13,34 +13,39 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Step 2: Install Heroku CLI
+      # Step 2: Clean repository (remove any leftover configurations or submodules)
+      - name: Clean repository
+        run: |
+          git clean -fdx
+
+      # Step 3: Install Heroku CLI
       - name: Set up Heroku CLI
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
           echo "Heroku CLI installed"
 
-      # Step 3: Log in to Heroku using the API key (explicit login process)
+      # Step 4: Log in to Heroku using the API key
       - name: Log in to Heroku
         run: |
           echo ${{ secrets.HEROKU_API_KEY }} | heroku auth:token
           echo "Logged in to Heroku successfully"
 
-      # Step 4: Build the Docker container
+      # Step 5: Build Docker container
       - name: Build Docker container
         run: |
           docker build -t registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web .
 
-      # Step 5: Push Docker container to Heroku
+      # Step 6: Push Docker container to Heroku
       - name: Push Docker container to Heroku
         run: |
           docker push registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web
 
-      # Step 6: Release Docker container
+      # Step 7: Release Docker container
       - name: Release Docker container
         run: |
           heroku container:release web --app ${{ secrets.HEROKU_APP_NAME }}
 
-      # Step 7: Verify Heroku app status
+      # Step 8: Verify Heroku app status
       - name: Check Heroku app status
         run: |
           heroku apps:info --app ${{ secrets.HEROKU_APP_NAME }}
